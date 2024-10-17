@@ -1,8 +1,8 @@
 //******************************************************************************
-/// @FILE    axi_lite_uart.v
+/// @FILE    axi_lite_1553.v
 /// @AUTHOR  JAY CONVERTINO
-/// @DATE    2024.02.29
-/// @BRIEF   AXIS UART
+/// @DATE    2024.10.17
+/// @BRIEF   AXIS 1553
 /// @DETAILS
 ///
 /// @LICENSE MIT
@@ -30,18 +30,13 @@
 `timescale 1ns/100ps
 
 //UART
-module axi_lite_uart #(
+module axi_lite_1553 #(
     parameter ADDRESS_WIDTH     = 32,
     parameter CLOCK_SPEED       = 100000000,
-    parameter BAUD_RATE         = 115200,
-    parameter PARITY_ENA        = 0,
-    parameter PARITY_TYPE       = 0,
-    parameter STOP_BITS         = 1,
-    parameter DATA_BITS         = 8,
-    parameter RX_DELAY          = 0,
-    parameter RX_BAUD_DELAY     = 0,
-    parameter TX_DELAY          = 0,
-    parameter TX_BAUD_DELAY     = 0
+    parameter SAMPLE_RATE       = 2000000,
+    parameter BIT_SLICE_OFFSET  = 0,
+    parameter INVERT_DATA       = 0,
+    parameter SAMPLE_SELECT     = 0
   )
   (
     //clock and reset
@@ -69,13 +64,11 @@ module axi_lite_uart #(
     output  [31:0]              s_axi_rdata,
     output  [ 1:0]              s_axi_rresp,
     input                       s_axi_rready,
-    //irq
-    output          irq,
-    //UART
-    output          tx,
-    input           rx,
-    output          rts,
-    input           cts
+    //1553 diffs
+    input   [1:0]               i_diff,
+    output  [1:0]               o_diff,
+    output                      en_o_diff,
+    output                      irq
   );
 
   //read interface
@@ -121,19 +114,14 @@ module axi_lite_uart #(
     .up_rack(up_rack)
   );
 
-  up_uart #(
+  up_1553 #(
     .ADDRESS_WIDTH(ADDRESS_WIDTH),
     .CLOCK_SPEED(CLOCK_SPEED),
-    .BAUD_RATE(BAUD_RATE),
-    .PARITY_ENA(PARITY_ENA),
-    .PARITY_TYPE(PARITY_TYPE),
-    .STOP_BITS(STOP_BITS),
-    .DATA_BITS(DATA_BITS),
-    .RX_DELAY(RX_DELAY),
-    .RX_BAUD_DELAY(RX_BAUD_DELAY),
-    .TX_DELAY(TX_DELAY),
-    .TX_BAUD_DELAY(TX_BAUD_DELAY)
-  ) inst_up_uart (
+    .SAMPLE_RATE(SAMPLE_RATE),
+    .BIT_SLICE_OFFSET(BIT_SLICE_OFFSET),
+    .INVERT_DATA(INVERT_DATA),
+    .SAMPLE_SELECT(SAMPLE_SELECT)
+  ) inst_up_1553 (
     //axis clock and reset
     .clk(aclk),
     .rstn(arstn),
@@ -148,12 +136,10 @@ module axi_lite_uart #(
     .up_wack(up_wack),
     .up_waddr(up_waddr),
     .up_wdata(up_wdata),
-    //irq
-    .irq(irq),
-    //UART
-    .tx(tx),
-    .rx(rx),
-    .rts(rts),
-    .cts(cts)
+    //1553 diffs
+    .i_diff(i_diff),
+    .o_diff(o_diff),
+    .en_o_diff(en_o_diff),
+    .irq(irq)
   );
 endmodule

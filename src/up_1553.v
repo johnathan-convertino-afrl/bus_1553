@@ -1,10 +1,9 @@
 //******************************************************************************
-/// @FILE    up_uart.v
+/// @FILE    up_1553.v
 /// @AUTHOR  JAY CONVERTINO
-/// @DATE    2024.02.29
-/// @BRIEF   AXIS UART
-/// @DETAILS Core for interfacing with simple UART communications. Output is
-///          always the size of DATA_BITS.
+/// @DATE    2024.10.17
+/// @BRIEF   AXIS 1553
+/// @DETAILS Core for interfacing with simple 1553 communications.
 ///
 ///  @LICENSE MIT
 ///  Copyright 2024 Jay Convertino
@@ -30,20 +29,15 @@
 
 `timescale 1ns/100ps
 
-//UP UART
-module up_uart #(
+//UP 1553
+module up_1553 #(
     parameter ADDRESS_WIDTH = 32,
     parameter BUS_WIDTH     = 4,
     parameter CLOCK_SPEED   = 100000000,
-    parameter BAUD_RATE     = 2000000,
-    parameter PARITY_ENA    = 0,
-    parameter PARITY_TYPE   = 0,
-    parameter STOP_BITS     = 1,
-    parameter DATA_BITS     = 8,
-    parameter RX_DELAY      = 0,
-    parameter RX_BAUD_DELAY = 0,
-    parameter TX_DELAY      = 0,
-    parameter TX_BAUD_DELAY = 0
+    parameter SAMPLE_RATE   = 2000000,
+    parameter BIT_SLICE_OFFSET  = 0,
+    parameter INVERT_DATA       = 0,
+    parameter SAMPLE_SELECT     = 0
   ) 
   (
     //clock and reset
@@ -60,16 +54,15 @@ module up_uart #(
     output                      up_wack,
     input   [ADDRESS_WIDTH-1:0] up_waddr,
     input   [(BUS_WIDTH*8)-1:0] up_wdata,
-    //irq
-    output          irq,
-    //UART
-    output          tx,
-    input           rx,
-    output          rts,
-    input           cts
+    //1553 diffs
+    input   [1:0]               i_diff,
+    output  [1:0]               o_diff,
+    output                      en_o_diff,
+    output                      irq
+
   );
 
-  //FIFO Depth matches UART LITE (xilinx)
+  //FIFO Depth matches UART LITE (xilinx), so I kept this just cause
   localparam FIFO_DEPTH = 16;
 
   //register address decoding
@@ -96,7 +89,7 @@ module up_uart #(
   reg                       r_tx_wen;
 
   //uart rx
-  wire [DATA_BITS-1:0]      m_axis_tdata;
+  wire [(BUS_WIDTH*8)-1:0]  m_axis_tdata;
   wire                      m_axis_tvalid;
   wire                      rx_full;
   wire [(BUS_WIDTH*8)-1:0]  rx_rdata;
@@ -106,7 +99,6 @@ module up_uart #(
   wire                      s_parity_err;
   wire                      s_frame_err;
   reg                       r_rx_ren;
-  reg                       r_overflow;
 
   //up registers
   reg                       r_up_rack;
@@ -139,8 +131,6 @@ module up_uart #(
 
       r_rx_ren    <= 1'b0;
 
-      r_overflow  <= 1'b0;
-
       r_control_reg <= 0;
     end else begin
       r_up_rack   <= 1'b0;
@@ -152,12 +142,6 @@ module up_uart #(
       r_control_reg[RESET_RX_BIT] <= 1'b0;
       r_control_reg[RESET_TX_BIT] <= 1'b0;
 
-      if(rx_full == 1'b1)
-      begin
-        r_overflow <= 1'b1;
-      end
-
-
       if(up_rreq == 1'b1)
       begin
         r_up_rack <= 1'b1;
@@ -167,9 +151,8 @@ module up_uart #(
             r_up_rdata <= rx_rdata & {{(BUS_WIDTH*8-DATA_BITS){1'b0}}, {DATA_BITS{1'b1}}};
             r_rx_ren <= 1'b1;
           end
-          STATUS_REG: begin
-            r_up_rdata <= {{(BUS_WIDTH*8-8){1'b0}}, s_parity_err, s_frame_err, r_overflow, r_irq_en, tx_full, tx_empty, rx_full, rx_valid};
-            r_overflow <= 1'b0;
+          STATUS_REG: begin                         //Data parity?, invert?,  4uS delay?
+            r_up_rdata <= {{(BUS_WIDTH*8-8){1'b0}}, rx_rdata[16], rx_rdata[17], rx_rdata[18], r_irq_en, tx_full, tx_empty, rx_full, rx_valid};
           end
           default:begin
             r_up_rdata <= 0;
@@ -243,40 +226,42 @@ module up_uart #(
       end
     end
   end
-  
-  axis_uart #(
-    .BAUD_CLOCK_SPEED(CLOCK_SPEED),
-    .BAUD_RATE(BAUD_RATE),
-    .PARITY_ENA(PARITY_ENA),
-    .PARITY_TYPE(PARITY_TYPE),
-    .STOP_BITS(STOP_BITS),
-    .DATA_BITS(DATA_BITS),
-    .RX_DELAY(RX_DELAY),
-    .RX_BAUD_DELAY(RX_BAUD_DELAY),
-    .TX_DELAY(TX_DELAY),
-    .TX_BAUD_DELAY(TX_BAUD_DELAY)
-  ) inst_axis_uart (
-    //axis clock and reset
+
+  axis_1553_encoder #(
+    .CLOCK_SPEED(CLOCK_SPEED),
+    .SAMPLE_RATE(SAMPLE_RATE)
+  ) inst_axis_1553_encoder (
+    //clock and reset
     .aclk(clk),
     .arstn(rstn),
-    //receive error
-    .parity_err(s_parity_err),
-    .frame_err(s_frame_err),
     //slave input
-    .s_axis_tdata(tx_rdata[DATA_BITS-1:0]),
+    .s_axis_tdata(tx_rdata[15:0]),
     .s_axis_tvalid(tx_valid),
+    .s_axis_tuser(tx_rdata[23:16]),
     .s_axis_tready(s_axis_tready),
+    //diff output
+    .diff(o_diff),
+    //enable output
+    .en_diff(en_o_diff)
+  );
+
+  axis_1553_decoder #(
+    .CLOCK_SPEED(CLOCK_SPEED),
+    .SAMPLE_RATE(SAMPLE_RATE),
+    .BIT_SLICE_OFFSET(BIT_SLICE_OFFSET),
+    .INVERT_DATA(INVERT_DATA),
+    .SAMPLE_SELECT(SAMPLE_SELECT)
+  ) inst_axis_1553_decoder (
+    //clock and reset
+    .aclk(clk),
+    .arstn(rstn),
     //master output
-    .m_axis_tdata(m_axis_tdata),
+    .m_axis_tdata(m_axis_tdata[15:0]),
     .m_axis_tvalid(m_axis_tvalid),
+    .m_axis_tuser(m_axis_tdata[23:16]),
     .m_axis_tready(~rx_full),
-    //UART
-    .uart_clk(clk),
-    .uart_rstn(rstn),
-    .tx(tx),
-    .rx(rx),
-    .rts(rts),
-    .cts(cts)
+    //diff input
+    .diff(i_diff)
   );
 
   //fifo for data to receive via uart

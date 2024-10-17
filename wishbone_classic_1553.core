@@ -1,24 +1,24 @@
 CAPI=2:
 
-name: AFRL:device:up_uart:1.0.0
-description: UART bus core for wishbone or AXI4, register map matches Xilinx UART Lite.
+name: AFRL:device:wishbone_classic_1553:1.0.0
+description: 1553 bus core for wishbone.
 
 filesets:
   src:
     files:
-      - src/up_uart.v
+      - src/wishbone_classic_1553.v
     file_type: verilogSource
   
   tb:
     files:
-      - tb/tb_up_uart.v
+      - tb/tb_wishbone_slave.v
     file_type: verilogSource
     
   dep:
     depend:
       - AFRL:utility:helper:1.0.0
-      - AFRL:device_converter:axis_uart:1.0.0
-      - AFRL:buffer:fifo
+      - AFRL:device:up_1553:1.0.0
+      - AFRL:bus:up_wishbone_classic:1.0.0
     
 targets:
   default: &default
@@ -30,4 +30,4 @@ targets:
     description: Base simulation using icarus as default.
     default_tool: icarus
     filesets_append: [tb]
-    toplevel: tb_up_uart
+    toplevel: tb_wishbone_slave
