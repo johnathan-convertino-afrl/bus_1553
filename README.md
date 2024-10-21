@@ -19,6 +19,10 @@
 #### Previous
   - none
 
+### Documentation
+  - Please see the doc folder for a PDF version, and the markdown version of the latex documentation.
+  - This can be regerated by executing the makefile in the root of the doc directory.
+
 ### Dependencies
 #### Build
   - AFRL:utility:helper:1.0.0

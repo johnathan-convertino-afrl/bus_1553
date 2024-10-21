@@ -1,0 +1,3 @@
+[submodule "doc/bus_1553.wiki"]
+	path = doc/bus_1553.wiki
+	url = https://github.com/johnathan-convertino-afrl/bus_1553.wiki.git
