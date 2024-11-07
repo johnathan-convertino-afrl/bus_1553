@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("axi",["Module","File"],[["axi_lite_1553",,[[,,,,0,"File:axi_lite_1553.v:axi_lite_1553","SystemVerilogModule:axi_lite_1553"],[,"axi_lite_1553.v",,,1,"File:axi_lite_1553.v:axi_lite_1553.v"]]]]);

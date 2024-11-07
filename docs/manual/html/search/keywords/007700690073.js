@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("wis",["Module","File"],[["wishbone_classic_1553",,[[,,,,0,"File:wishbone_classic_1553.v:wishbone_classic_1553","SystemVerilogModule:wishbone_classic_1553"],[,"wishbone_classic_1553.v",,,1,"File:wishbone_classic_1553.v:wishbone_classic_1553.v"]]]]);

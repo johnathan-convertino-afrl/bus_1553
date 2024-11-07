@@ -1,0 +1,1 @@
+﻿NDFramePage.OnPageTitleLoaded("SystemVerilogModule:inst_rx_fifo","inst_rx_fifo");NDSummary.OnSummaryLoaded("SystemVerilogModule:inst_rx_fifo",[["SystemVerilog","SystemVerilog"]],[["Modules","Module"]],[[46,0,0,"inst_rx_fifo"]]);

@@ -1,0 +1,1 @@
+﻿NDFramePage.OnPageTitleLoaded("SystemVerilogModule:inst_axis_1553_encoder","inst_axis_1553_encoder");NDSummary.OnSummaryLoaded("SystemVerilogModule:inst_axis_1553_encoder",[["SystemVerilog","SystemVerilog"]],[["Modules","Module"]],[[44,0,0,"inst_axis_1553_encoder"]]);

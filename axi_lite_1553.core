@@ -79,6 +79,7 @@ targets:
       - RAND_READY=1
       - FIFO_DEPTH
 
+
 parameters:
   RAND_READY:
     datatype    : int

@@ -1,35 +1,70 @@
 //******************************************************************************
-/// @FILE    up_1553.v
-/// @AUTHOR  JAY CONVERTINO
-/// @DATE    2024.10.17
-/// @BRIEF   AXIS 1553
-/// @DETAILS Core for interfacing with simple 1553 communications.
-///
-///  @LICENSE MIT
-///  Copyright 2024 Jay Convertino
-///
-///  Permission is hereby granted, free of charge, to any person obtaining a copy
-///  of this software and associated documentation files (the "Software"), to 
-///  deal in the Software without restriction, including without limitation the
-///  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or 
-///  sell copies of the Software, and to permit persons to whom the Software is 
-///  furnished to do so, subject to the following conditions:
-///
-///  The above copyright notice and this permission notice shall be included in 
-///  all copies or substantial portions of the Software.
-///
-///  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-///  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-///  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-///  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-///  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
-///  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-///  IN THE SOFTWARE.
+// file:    up_1553.v
+//
+// author:  JAY CONVERTINO
+//
+// date:    2024/10/17
+//
+// about:   Brief
+// uP Core for interfacing with simple 1553 communications.
+//
+// license: License MIT
+// Copyright 2024 Jay Convertino
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+// sell copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+// IN THE SOFTWARE.
+//
 //******************************************************************************
 
 `timescale 1ns/100ps
 
-//UP 1553
+/*
+ * Module: up_1553
+ *
+ * uP based 1553 communications device.
+ *
+ * Parameters:
+ *
+ *   ADDRESS_WIDTH   - Width of the uP address port.
+ *   BUS_WIDTH       - Width of the uP bus data port.
+ *   CLOCK_SPEED     - This is the aclk frequency in Hz
+ *   SAMPLE_RATE     - Rate of in which to sample the 1553 bus. Must be 2 MHz or more and less than aclk. This is in Hz.
+ *   BIT_SLICE_OFFSET- Adjust where the sample is taken from the input.
+ *   INVERT_DATA     - Invert all 1553 bits coming in and out.
+ *   SAMPLE_SELECT   - Adjust where in the array of samples to select a bit.
+ *
+ * Ports:
+ *
+ *   clk            - Clock for all devices in the core
+ *   rstn           - Negative reset
+ *   up_rreq        - uP bus read request
+ *   up_rack        - uP bus read ack
+ *   up_raddr       - uP bus read address
+ *   up_rdata       - uP bus read data
+ *   up_wreq        - uP bus write request
+ *   up_wack        - uP bus write ack
+ *   up_waddr       - uP bus write address
+ *   up_wdata       - uP bus write data
+ *   i_diff         - Input differential signal for 1553 bus
+ *   o_diff         - Output differential signal for 1553 bus
+ *   en_o_diff      - Enable output of differential signal (for signal switching on 1553 module)
+ *   irq            - Interrupt when data is received
+ */
 module up_1553 #(
     parameter ADDRESS_WIDTH = 32,
     parameter BUS_WIDTH     = 4,
@@ -40,21 +75,16 @@ module up_1553 #(
     parameter SAMPLE_SELECT     = 0
   ) 
   (
-    //clock and reset
-    input           clk,
-    input           rstn,
-    //UP interface
-    //read interface
+    input                       clk,
+    input                       rstn,
     input                       up_rreq,
     output                      up_rack,
     input   [ADDRESS_WIDTH-1:0] up_raddr,
     output  [(BUS_WIDTH*8)-1:0] up_rdata,
-    //write interface
     input                       up_wreq,
     output                      up_wack,
     input   [ADDRESS_WIDTH-1:0] up_waddr,
     input   [(BUS_WIDTH*8)-1:0] up_wdata,
-    //1553 diffs
     input   [1:0]               i_diff,
     output  [1:0]               o_diff,
     output                      en_o_diff,
@@ -62,21 +92,62 @@ module up_1553 #(
 
   );
 
-  //FIFO Depth matches UART LITE (xilinx), so I kept this just cause
+  // var: FIFO_DEPTH
+  // Depth of the fifo, matches UART LITE (xilinx), so I kept this just cause
   localparam FIFO_DEPTH = 16;
 
-  //register address decoding
-  localparam RX_FIFO_REG = 4'h0;
-  localparam TX_FIFO_REG = 4'h4;
-  localparam STATUS_REG  = 4'h8;
-  localparam CONTROL_REG = 4'hC;
+  // Group: Register Information
+  // Core has 4 registers at the offsets that follow.
+  //
+  //  <RX_FIFO_REG> - h0
+  //  <TX_FIFO_REG> - h4
+  //  <STATUS_REG>  - h8
+  //  <CONTROL_REG> - hC
 
+  // Register Address: RX_FIFO_REG
+  // Defines the address offset for RX FIFO
+  // (see diagrams/reg_RX_FIFO.png)
+  // Valid bits are from 23:0. Bits 23:16 are information about the data.  Bit 15:0 are data.
+  localparam RX_FIFO_REG = 4'h0;
+  // Register Address: TX_FIFO_REG
+  // Defines the address offset to write the TX FIFO.
+  // (see diagrams/reg_TX_FIFO.png)
+  // Valid bits are from 23:0. Bits 23:16 are information about the data.  Bit 15:0 are data.
+  localparam TX_FIFO_REG = 4'h4;
+  // Register Address: STATUS_REG
+  // Defines the address offset to read the status bits.
+  // (see diagrams/reg_STATUS.png)
+  localparam STATUS_REG  = 4'h8;
+  /* Register Bits: Status Register Bits
+   *
+   * rx_rdata - 7, 16
+   * rx_rdata - 6, 17
+   * rx_rdata - 5, 18
+   * r_irq_en - 4, 1 when the IRQ is enabled by <CONTROL_REG>
+   * tx_full  - 3, When 1 the tx fifo is full.
+   * tx_empty - 2, When 1 the tx fifo is empty.
+   * rx_full  - 1, When 1 the rx fifo is full.
+   * rx_valid - 0, When 1 the rx fifo contains valid data.
+   */
+  // Register Address: CONTROL_REG
+  // Defines the address offset to set the control bits.
+  // (see diagrams/reg_CONTROL.png)
+  // See Also: <ENABLE_INTR_BIT>, <RESET_RX_BIT>, <RESET_TX_BIT>
+  localparam CONTROL_REG = 4'hC;
+  /* Register Bits: Control Register Bits
+   *
+   * ENABLE_INTR_BIT  - 4, Control Register offset bit for enabling the interrupt.
+   * RESET_RX_BIT     - 1, Control Register offset bit for resetting the RX FIFO.
+   * RESET_TX_BIT     - 0, Control Register offset bit for resetting the TX FIFO.
+   */
   localparam ENABLE_INTR_BIT  = 4;
   localparam RESET_RX_BIT     = 1;
   localparam RESET_TX_BIT     = 0;
 
-  //fifo internal reset
+
+  // Register for reset delay once RESET_RX_BIT is set.
   reg  [FIFO_DEPTH-1:0]     r_rstn_rx_delay;
+  // Register for reset delay once RESET_TX_BIT is set.
   reg  [FIFO_DEPTH-1:0]     r_rstn_tx_delay;
 
   //uart tx
@@ -147,6 +218,7 @@ module up_1553 #(
         r_up_rack <= 1'b1;
 
         case(up_raddr[3:0])
+          /// @REG RX_FIFO_REG
           RX_FIFO_REG: begin
             r_up_rdata <= rx_rdata & {{(BUS_WIDTH*8-DATA_BITS){1'b0}}, {DATA_BITS{1'b1}}};
             r_rx_ren <= 1'b1;
@@ -227,24 +299,31 @@ module up_1553 #(
     end
   end
 
+  //Group: Instantiated Modules
+  /*
+   * Module: inst_axis_1553_encoder
+   *
+   * Encode incoming AXIS data into a differential 1553 data stream
+   */
   axis_1553_encoder #(
     .CLOCK_SPEED(CLOCK_SPEED),
     .SAMPLE_RATE(SAMPLE_RATE)
   ) inst_axis_1553_encoder (
-    //clock and reset
     .aclk(clk),
     .arstn(rstn),
-    //slave input
     .s_axis_tdata(tx_rdata[15:0]),
     .s_axis_tvalid(tx_valid),
     .s_axis_tuser(tx_rdata[23:16]),
     .s_axis_tready(s_axis_tready),
-    //diff output
     .diff(o_diff),
-    //enable output
     .en_diff(en_o_diff)
   );
 
+  /*
+   * Module: inst_axis_1553_decoder
+   *
+   * Decode incoming differential 1553 data stream to AXIS data format.
+   */
   axis_1553_decoder #(
     .CLOCK_SPEED(CLOCK_SPEED),
     .SAMPLE_RATE(SAMPLE_RATE),
@@ -252,19 +331,20 @@ module up_1553 #(
     .INVERT_DATA(INVERT_DATA),
     .SAMPLE_SELECT(SAMPLE_SELECT)
   ) inst_axis_1553_decoder (
-    //clock and reset
     .aclk(clk),
     .arstn(rstn),
-    //master output
     .m_axis_tdata(m_axis_tdata[15:0]),
     .m_axis_tvalid(m_axis_tvalid),
     .m_axis_tuser(m_axis_tdata[23:16]),
     .m_axis_tready(~rx_full),
-    //diff input
     .diff(i_diff)
   );
 
-  //fifo for data to receive via uart
+  /*
+   * Module: inst_rx_fifo
+   *
+   * Buffer up to 16 items output from the axis_1553_encoder.
+   */
   fifo #(
     .FIFO_DEPTH(FIFO_DEPTH),
     .BYTE_WIDTH(BUS_WIDTH),
@@ -279,27 +359,28 @@ module up_1553 #(
     .ACK_ENA(0),
     .RAM_TYPE("block")
   ) inst_rx_fifo (
-    // read interface
     .rd_clk(clk),
     .rd_rstn(rstn & r_rstn_rx_delay[0]),
     .rd_en(s_rx_ren),
     .rd_valid(rx_valid),
     .rd_data(rx_rdata),
     .rd_empty(rx_empty),
-    // write interface
     .wr_clk(clk),
     .wr_rstn(rstn & r_rstn_rx_delay[0]),
     .wr_en(m_axis_tvalid),
     .wr_ack(),
     .wr_data({{(BUS_WIDTH*8-DATA_BITS){1'b0}}, m_axis_tdata}),
     .wr_full(rx_full),
-    // data count interface
     .data_count_clk(clk),
     .data_count_rstn(rstn & r_rstn_rx_delay[0]),
     .data_count()
   );
 
-  //fifo for data to transmit via uart
+  /*
+   * Module: inst_tx_fifo
+   *
+   * Buffer up to 16 items to input to the axis_1553_decoder.
+   */
   fifo #(
     .FIFO_DEPTH(FIFO_DEPTH),
     .BYTE_WIDTH(BUS_WIDTH),
@@ -314,21 +395,18 @@ module up_1553 #(
     .ACK_ENA(0),
     .RAM_TYPE("block")
   ) inst_tx_fifo (
-    // read interface
     .rd_clk(clk),
     .rd_rstn(rstn & r_rstn_tx_delay[0]),
     .rd_en(s_axis_tready),
     .rd_valid(tx_valid),
     .rd_data(tx_rdata),
     .rd_empty(tx_empty),
-    // write interface
     .wr_clk(clk),
     .wr_rstn(rstn & r_rstn_tx_delay[0]),
     .wr_en(r_tx_wen),
     .wr_ack(),
     .wr_data(r_tx_wdata),
     .wr_full(tx_full),
-    // data count interface
     .data_count_clk(clk),
     .data_count_rstn(rstn & r_rstn_tx_delay[0]),
     .data_count()

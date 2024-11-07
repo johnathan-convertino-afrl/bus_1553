@@ -1,5 +1,8 @@
-# BUS 1553
+# BUS1553
 ### 1553 TO BUS (WISHBONE CLASSIC, AXI_LITE)
+
+![image](docs/manual/img/AFRL.png)
+
 ---
 
    author: Jay Convertino   
@@ -14,14 +17,16 @@
 
 ### Version
 #### Current
-  - V1.0.0 - initial release
+  - pre-Alpha
 
 #### Previous
   - none
 
 ### Documentation
-  - Please see the doc folder for a PDF version, and the markdown version of the latex documentation.
-  - This can be regerated by executing the makefile in the root of the doc directory.
+  For detailed usage information, please navigate to one of the following sources. They are the same, just in a different format.
+
+  - [bus1553.pdf](docs/manual/bus1553.pdf)
+  - [github page](https://johnathan-convertino-afrl.github.io/bus_1553/)
 
 ### Dependencies
 #### Build
@@ -35,13 +40,7 @@
 #### Simulation
   - AFRL:simulation:axis_stimulator
 
-### IP USAGE
-#### INSTRUCTIONS
-
-
-#### PARAMETERS
-
-#### REGISTERS
+### REGISTERS
   - 0x0 = RX_FIFO (R)
     * 32 bit register, DATA_BITS downto 0 hold RX UART data.
   - 0x4 = TX FIFO (W)
