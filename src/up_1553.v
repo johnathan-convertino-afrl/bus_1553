@@ -120,14 +120,14 @@ module up_1553 #(
   localparam STATUS_REG  = 4'h8;
   /* Register Bits: Status Register Bits
    *
-   * rx_rdata - 7, 16
-   * rx_rdata - 6, 17
-   * rx_rdata - 5, 18
-   * r_irq_en - 4, 1 when the IRQ is enabled by <CONTROL_REG>
-   * tx_full  - 3, When 1 the tx fifo is full.
-   * tx_empty - 2, When 1 the tx fifo is empty.
-   * rx_full  - 1, When 1 the rx fifo is full.
-   * rx_valid - 0, When 1 the rx fifo contains valid data.
+   * PC        - 7, Parity check passed?
+   * DI        - 6, Build time option to invert data from the core, 1 is active.
+   * Delay     - 5, Message had a 4uS delay.
+   * irq_en    - 4, 1 when the IRQ is enabled by <CONTROL_REG>
+   * tx_full   - 3, When 1 the tx fifo is full.
+   * tx_empty  - 2, When 1 the tx fifo is empty.
+   * rx_full   - 1, When 1 the rx fifo is full.
+   * rx_valid  - 0, When 1 the rx fifo contains valid data.
    */
   // Register Address: CONTROL_REG
   // Defines the address offset to set the control bits.

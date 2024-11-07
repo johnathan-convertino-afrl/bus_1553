@@ -23,14 +23,6 @@ all: $(ND_PDF) $(LAT_PDF_PDF)
 %.pdf: $(HTML_DIR)/files/%.html
 	wkhtmltopdf --page-size letter -B 38 -L 38 -R 38 -T 38 --no-background --enable-local-file-access $^ $@
 
-%.jpg: %.pdf
-	pdftoppm -gray -r 300 -jpeg $^ > $@
-	rm $^
-	convert -trim $@ $@
-	rm $(basename $@).log $(basename $@).aux
-	mkdir -p $(DIAGRAM_OUT_DIR)
-	mv $@ $(DIAGRAM_OUT_DIR)/$@
-
 $(LAT_PDF_PDF): $(LAT_PDF_SRC) $(LAT_COM_SRC)
 	pdflatex -jobname $(basename $@) -shell-escape -interaction=batchmode $<
 	pdflatex -jobname $(basename $@) -shell-escape -interaction=batchmode $<
