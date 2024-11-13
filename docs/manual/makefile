@@ -1,4 +1,4 @@
-PROJECT_NAME := bus1553
+PROJECT_NAME := bus_1553
 
 MK_DIR := makefiles
 
