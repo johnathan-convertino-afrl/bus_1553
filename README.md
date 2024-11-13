@@ -25,7 +25,7 @@
 ### DOCUMENTATION
   For detailed usage information, please navigate to one of the following sources. They are the same, just in a different format.
 
-  - [bus1553.pdf](docs/manual/bus1553.pdf)
+  - [bus_1553.pdf](docs/manual/bus_1553.pdf)
   - [github page](https://johnathan-convertino-afrl.github.io/bus_1553/)
 
 ### DEPENDENCIES
