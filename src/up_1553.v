@@ -40,7 +40,7 @@
  *
  * Parameters:
  *
- *   ADDRESS_WIDTH   - Width of the uP address port.
+ *   ADDRESS_WIDTH   - Width of the uP address port, max 32 bit.
  *   BUS_WIDTH       - Width of the uP bus data port.
  *   CLOCK_SPEED     - This is the aclk frequency in Hz
  *   SAMPLE_RATE     - Rate of in which to sample the 1553 bus. Must be 2 MHz or more and less than aclk. This is in Hz.
@@ -75,22 +75,25 @@ module up_1553 #(
     parameter SAMPLE_SELECT     = 0
   ) 
   (
-    input                       clk,
-    input                       rstn,
-    input                       up_rreq,
-    output                      up_rack,
-    input   [ADDRESS_WIDTH-1:0] up_raddr,
-    output  [(BUS_WIDTH*8)-1:0] up_rdata,
-    input                       up_wreq,
-    output                      up_wack,
-    input   [ADDRESS_WIDTH-1:0] up_waddr,
-    input   [(BUS_WIDTH*8)-1:0] up_wdata,
-    input   [1:0]               i_diff,
-    output  [1:0]               o_diff,
-    output                      en_o_diff,
-    output                      irq
+    input                                           clk,
+    input                                           rstn,
+    input                                           up_rreq,
+    output                                          up_rack,
+    input   [ADDRESS_WIDTH-(ADDRESS_WIDTH/16)-1:0]  up_raddr,
+    output  [(BUS_WIDTH*8)-1:0]                     up_rdata,
+    input                                           up_wreq,
+    output                                          up_wack,
+    input   [ADDRESS_WIDTH-(ADDRESS_WIDTH/16)-1:0]  up_waddr,
+    input   [(BUS_WIDTH*8)-1:0]                     up_wdata,
+    input   [1:0]                                   i_diff,
+    output  [1:0]                                   o_diff,
+    output                                          en_o_diff,
+    output                                          irq
 
   );
+  // var: DIVISOR
+  // Divide the address register default location for 1 byte access to multi byte access. (register offsets are byte offsets).
+  localparam DIVISOR = ADDRESS_WIDTH/16;
 
   // var: FIFO_DEPTH
   // Depth of the fifo, matches UART LITE (xilinx), so I kept this just cause
@@ -108,16 +111,16 @@ module up_1553 #(
   // Defines the address offset for RX FIFO
   // (see diagrams/reg_RX_FIFO.png)
   // Valid bits are from 23:0. Bits 23:16 are information about the data.  Bit 15:0 are data.
-  localparam RX_FIFO_REG = 4'h0;
+  localparam RX_FIFO_REG = 4'h0 >> DIVISOR;
   // Register Address: TX_FIFO_REG
   // Defines the address offset to write the TX FIFO.
   // (see diagrams/reg_TX_FIFO.png)
   // Valid bits are from 23:0. Bits 23:16 are information about the data.  Bit 15:0 are data.
-  localparam TX_FIFO_REG = 4'h4;
+  localparam TX_FIFO_REG = 4'h4 >> DIVISOR;
   // Register Address: STATUS_REG
   // Defines the address offset to read the status bits.
   // (see diagrams/reg_STATUS.png)
-  localparam STATUS_REG  = 4'h8;
+  localparam STATUS_REG  = 4'h8 >> DIVISOR;
   /* Register Bits: Status Register Bits
    *
    * PC        - 7, Parity check passed?
