@@ -34,9 +34,9 @@
 `timescale 1ns/100ps
 
 /*
- * Module: wishbone_classic_1553
+ * Module: wishbone_standard_1553
  *
- * Wishbone Calssic based 1553 communications device.
+ * Wishbone Stanard based 1553 communications device.
  *
  * Parameters:
  *
@@ -66,7 +66,7 @@
  *   en_o_diff      - Enable output of differential signal (for signal switching on 1553 module)
  *   irq            - Interrupt when data is received
  */
-module wishbone_classic_1553 #(
+module wishbone_standard_1553 #(
     parameter ADDRESS_WIDTH     = 32,
     parameter BUS_WIDTH         = 4,
     parameter CLOCK_SPEED       = 100000000,
@@ -121,10 +121,10 @@ module wishbone_classic_1553 #(
 
   //Group: Instantianted Modules
 
-  // Module: inst_up_wishbone_classic
+  // Module: inst_up_wishbone_standard
   //
-  // Module instance of up_wishbone_classic for the Wishbone Classic bus to the uP bus.
-  up_wishbone_classic #(
+  // Module instance of up_wishbone_standard for the Wishbone Classic Standard bus to the uP bus.
+  up_wishbone_standard #(
     .ADDRESS_WIDTH(ADDRESS_WIDTH),
     .BUS_WIDTH(BUS_WIDTH)
   ) inst_up_wishbone_classic (

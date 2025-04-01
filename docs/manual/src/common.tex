@@ -45,7 +45,7 @@ The following are the dependencies of the cores.
 
 \input{src/fusesoc/depend_axi_lite_1553.tex}
 
-\input{src/fusesoc/depend_wishbone_classic_1553.tex}
+\input{src/fusesoc/depend_wishbone_standard_1553.tex}
 
 \input{src/fusesoc/depend_up_1553.tex}
 
@@ -62,7 +62,7 @@ This core is made up of other cores that are documented in detail in there sourc
   \item \textbf{axis\_1553\_decoder} Decodes data from the PMOD1553 and sends it to the TX FIFO (see core for documentation).
   \item \textbf{fifo} Used for RX and TX FIFO instances. Set to 16 words buffer max (see core for documentation).
   \item \textbf{up\_axi} An AXI Lite to uP converter core (see core for documentation).
-  \item \textbf{up\_wishbone\_classic} A wishbone classic to uP converter core (see core for documentation).
+  \item \textbf{up\_wishbone\_standard} A wishbone standard to uP converter core (see core for documentation).
   \item \textbf{up\_1553} Takes uP bus and coverts it to interface with the RX/TX FIFOs and the encoder/decoder (see module documentation for information \ref{Module Documentation}).
 \end{itemize}
 
@@ -84,7 +84,7 @@ a system and should be integrated into a fusesoc based system. Simulations are s
 
 \input{src/fusesoc/files_axi_lite_1553.tex}
 
-\input{src/fusesoc/files_wishbone_classic_1553.tex}
+\input{src/fusesoc/files_wishbone_standard_1553.tex}
 
 \input{src/fusesoc/files_up_1553.tex}
 
@@ -92,7 +92,7 @@ a system and should be integrated into a fusesoc based system. Simulations are s
 
 \input{src/fusesoc/targets_axi_lite_1553.tex}
 
-\input{src/fusesoc/targets_wishbone_classic_1553.tex}
+\input{src/fusesoc/targets_wishbone_standard_1553.tex}
 
 \input{src/fusesoc/targets_up_1553.tex}
 
@@ -143,7 +143,7 @@ axi\_lite\_1553 module adds a AXI Lite to uP (microprocessor) bus converter. The
 from Analog Devices.
 
 \par
-wishbone\_classic\_1553 module adds a Wishbone Classic to uP (microprocessor) bus converter. This
+wishbone\_standard\_1553 module adds a Wishbone Classic to uP (microprocessor) bus converter. This
 converter was designed for Wishbone Classic only, NOT pipelined.
 
 \vspace{15mm}
