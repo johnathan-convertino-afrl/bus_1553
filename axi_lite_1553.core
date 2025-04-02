@@ -19,11 +19,6 @@ filesets:
       - AFRL:utility:helper:1.0.0
       - AFRL:device:up_1553:1.0.0
       - AD:common:up_axi:1.0.0
-      
-  dep_tb:
-    depend:
-      - AFRL:simulation:axis_stimulator
-      - AFRL:utility:sim_helper
     
 targets:
   default: &default
