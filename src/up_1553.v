@@ -194,7 +194,6 @@ module up_1553 #(
   wire                      s_rx_ren;
   wire                      s_parity_err;
   wire                      s_frame_err;
-  reg                       r_rx_ren;
 
   //up registers
   reg                       r_up_rack;
@@ -209,12 +208,12 @@ module up_1553 #(
   reg                       r_irq;
 
   //output signals assigned to registers.
-  assign up_rack  = r_up_rack & up_rreq;
-  assign up_wack  = r_up_wack & up_wreq;
-  assign up_rdata = r_up_rdata & {BUS_WIDTH*8{up_rreq}};
+  assign up_rack  = r_up_rack;
+  assign up_wack  = r_up_wack;
+  assign up_rdata = r_up_rdata;
   assign irq      = r_irq;
 
-  assign s_rx_ren = ((up_raddr[3:0] == RX_FIFO_REG) && up_rreq ? r_up_rack & r_rx_ren : 0);
+  assign s_rx_ren = (up_raddr[3:0] == RX_FIFO_REG) && up_rreq;
 
   //up registers decoder
   always @(posedge clk)
@@ -225,28 +224,23 @@ module up_1553 #(
       r_up_wack   <= 1'b0;
       r_up_rdata  <= 0;
 
-      r_rx_ren    <= 1'b0;
-
       r_control_reg <= 0;
     end else begin
       r_up_rack   <= 1'b0;
       r_up_wack   <= 1'b0;
       r_tx_wen    <= 1'b0;
-      r_rx_ren    <= 1'b0;
       r_up_rdata  <= r_up_rdata;
       //clear reset bits
       r_control_reg[RESET_RX_BIT] <= 1'b0;
       r_control_reg[RESET_TX_BIT] <= 1'b0;
 
-      if(up_rreq == 1'b1)
-      begin
-        r_up_rack <= 1'b1;
+      r_up_rack <= up_rreq;
 
+      if(up_rreq == 1'b1) begin
         case(up_raddr[3:0])
           /// @REG RX_FIFO_REG
           RX_FIFO_REG: begin
             r_up_rdata <= rx_rdata & {{(BUS_WIDTH*8-DATA_BITS){1'b0}}, {DATA_BITS{1'b1}}};
-            r_rx_ren <= 1'b1;
           end
           STATUS_REG: begin                         //Data parity?, invert?,  4uS delay?
             r_up_rdata <= {{(BUS_WIDTH*8-8){1'b0}}, rx_rdata[16], rx_rdata[17], rx_rdata[18], r_irq_en, tx_full, tx_empty, rx_full, rx_valid};
@@ -257,23 +251,20 @@ module up_1553 #(
         endcase
       end
 
-      if(up_wreq == 1'b1)
-      begin
-        r_up_wack <= 1'b1;
+      r_up_wack <= up_wreq;
 
-        if(r_up_wack == 1'b1) begin
-          case(up_waddr[3:0])
-            TX_FIFO_REG: begin
-              r_tx_wdata  <= up_wdata;
-              r_tx_wen    <= 1'b1;
-            end
-            CONTROL_REG: begin
-              r_control_reg <= up_wdata;
-            end
-            default:begin
-            end
-          endcase
-        end
+      if(up_wreq == 1'b1) begin
+        case(up_waddr[3:0])
+          TX_FIFO_REG: begin
+            r_tx_wdata  <= up_wdata;
+            r_tx_wen    <= 1'b1;
+          end
+          CONTROL_REG: begin
+            r_control_reg <= up_wdata;
+          end
+          default:begin
+          end
+        endcase
       end
     end
   end

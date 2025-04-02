@@ -67,7 +67,7 @@ def start_clock(dut):
 # Cocotb coroutine for resets, used with await to make sure system is reset.
 async def reset_dut(dut):
   dut.rstn.value = 0
-  await Timer(5, units="ns")
+  await Timer(20, units="ns")
   dut.rstn.value = 1
 
 # Function: increment_test_cmd_send
@@ -97,7 +97,7 @@ async def increment_test_cmd_send(dut):
 
         await up_master.write(1, payload)
 
-        await Timer(40, units="ns")
+        await Timer(30, units="ns")
 
         status_reg = await up_master.read(2)
 
@@ -166,7 +166,7 @@ async def increment_test_data_send(dut):
 
         await up_master.write(1, payload)
 
-        await Timer(40, units="ns")
+        await Timer(30, units="ns")
 
         status_reg = await up_master.read(2)
 

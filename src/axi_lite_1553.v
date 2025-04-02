@@ -41,6 +41,7 @@
  * Parameters:
  *
  *   ADDRESS_WIDTH   - Width of the axi address bus, max 32 bit.
+ *   BUS_WIDTH       - Width in bytes of the data bus.
  *   CLOCK_SPEED     - This is the aclk frequency in Hz
  *   SAMPLE_RATE     - Rate of in which to sample the 1553 bus. Must be 2 MHz or more and less than aclk. This is in Hz.
  *   BIT_SLICE_OFFSET- Adjust where the sample is taken from the input.
@@ -77,6 +78,7 @@
  */
 module axi_lite_1553 #(
     parameter ADDRESS_WIDTH     = 32,
+    parameter BUS_WIDTH         = 4,
     parameter CLOCK_SPEED       = 100000000,
     parameter SAMPLE_RATE       = 2000000,
     parameter BIT_SLICE_OFFSET  = 0,
@@ -91,7 +93,7 @@ module axi_lite_1553 #(
     input   [ 2:0]              s_axi_awprot,
     output                      s_axi_awready,
     input                       s_axi_wvalid,
-    input   [31:0]              s_axi_wdata,
+    input   [BUS_WIDTH*8-1:0]   s_axi_wdata,
     input   [ 3:0]              s_axi_wstrb,
     output                      s_axi_wready,
     output                      s_axi_bvalid,
@@ -102,7 +104,7 @@ module axi_lite_1553 #(
     input   [ 2:0]              s_axi_arprot,
     output                      s_axi_arready,
     output                      s_axi_rvalid,
-    output  [31:0]              s_axi_rdata,
+    output  [BUS_WIDTH*8-1:0]   s_axi_rdata,
     output  [ 1:0]              s_axi_rresp,
     input                       s_axi_rready,
     input   [1:0]               i_diff,
@@ -179,6 +181,7 @@ module axi_lite_1553 #(
   // Module instance of up_1553 creating a Logic wrapper for 1553 bus cores to interface with uP bus.
   up_1553 #(
     .ADDRESS_WIDTH(ADDRESS_WIDTH),
+    .BUS_WIDTH(BUS_WIDTH),
     .CLOCK_SPEED(CLOCK_SPEED),
     .SAMPLE_RATE(SAMPLE_RATE),
     .BIT_SLICE_OFFSET(BIT_SLICE_OFFSET),
