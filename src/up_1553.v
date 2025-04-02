@@ -99,6 +99,10 @@ module up_1553 #(
   // Depth of the fifo, matches UART LITE (xilinx), so I kept this just cause
   localparam FIFO_DEPTH = 16;
 
+  // var: DATA_BITS
+  // Number of bits in RX/TX FIFO that are valid.
+  localparam DATA_BITS = 24;
+
   // Group: Register Information
   // Core has 4 registers at the offsets that follow.
   //
@@ -110,12 +114,30 @@ module up_1553 #(
   // Register Address: RX_FIFO_REG
   // Defines the address offset for RX FIFO
   // (see diagrams/reg_RX_FIFO.png)
-  // Valid bits are from 23:0. Bits 23:16 are information about the data.  Bit 15:0 are data.
+  // Valid bits are from 23:0. Bits 23:16 are status bits information about the data.  Bit 15:0 are data.
+  //
+  // Status Bits:
+  // {TY:3,NA:1,D:1,I:1,P:1}
+  //
+  // TY - Type is 3 bits, 000 NA, 001 = REG, 010 = DATA, 100 = CMD/STATUS
+  // NA - Unused is 1 bit
+  // D  - Delay Enabled is 1 bit, 1 is there was be a delay of 4 us or more, or 0 no delay.
+  // I  - Data invert enabled is 1 bit, 1 inverted in the core at synth, 0 it is not.
+  // P  - Parity Good is 1 bit, 1 is Good, 0 is Bad
   localparam RX_FIFO_REG = 4'h0 >> DIVISOR;
   // Register Address: TX_FIFO_REG
   // Defines the address offset to write the TX FIFO.
   // (see diagrams/reg_TX_FIFO.png)
-  // Valid bits are from 23:0. Bits 23:16 are information about the data.  Bit 15:0 are data.
+  // Valid bits are from 23:0. Bits 23:16 are status bits information about the data.  Bit 15:0 are data.
+  //
+  // Status Bits:
+  // {TY:3,NA:1,D:1,I:1,P:1}
+  //
+  // TY - Type is 3 bits, 000 NA, 001 = REG, 010 = DATA, 100 = CMD/STATUS
+  // NA - Unused is 1 bit
+  // D  - Delay Enabled is 1 bit, 1 is there must be a delay of 4 us or more, or 0 no delay.
+  // I  - Data invert enabled is 1 bit, set to 1 to invert data in the core, 0 it is not.
+  // P  - Parity Type is 1 bit, 1 is ODD, 0 is EVEN
   localparam TX_FIFO_REG = 4'h4 >> DIVISOR;
   // Register Address: STATUS_REG
   // Defines the address offset to read the status bits.
@@ -189,7 +211,7 @@ module up_1553 #(
   //output signals assigned to registers.
   assign up_rack  = r_up_rack & up_rreq;
   assign up_wack  = r_up_wack & up_wreq;
-  assign up_rdata = r_up_rdata;
+  assign up_rdata = r_up_rdata & {BUS_WIDTH*8{up_rreq}};
   assign irq      = r_irq;
 
   assign s_rx_ren = ((up_raddr[3:0] == RX_FIFO_REG) && up_rreq ? r_up_rack & r_rx_ren : 0);

@@ -23,7 +23,7 @@ filesets:
     depend:
       - AFRL:utility:helper:1.0.0
       - AFRL:device_converter:axis_1553_encoder:1.0.0
-      - AFRL:device_converter:axis_1553_dencoder:1.0.0
+      - AFRL:device_converter:axis_1553_decoder:1.0.0
       - AFRL:buffer:fifo
     
 targets:
@@ -44,7 +44,7 @@ targets:
     flow: sim
     flow_options:
       tool: icarus
-      cocotb_module: tb_cocotb
+      cocotb_module: tb_cocotb_up
       timescale: 1ns/1ns
       vcs_options: [-timescale=1ns/1ns]
     filesets_append: [tb_cocotb]
