@@ -81,10 +81,10 @@
 ### FUSESOC
 
 * fusesoc_info.core created.
-* Simulation uses icarus to run data through the core.
+* Simulation uses cocotb with icarus to run data through the core.
 
 #### Targets
 
 * RUN WITH: (fusesoc run --target=sim VENDER:CORE:NAME:VERSION)
   - default (for IP integration builds)
-  - sim
+  - sim_cocotb
