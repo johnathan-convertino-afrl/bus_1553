@@ -1,1 +1,1 @@
-﻿NDMenu.OnSectionLoaded("files.js",[[1,"axi_lite_1553.v"],[1,"up_1553.v"],[1,"wishbone_standard_1553.v"]]);
+﻿NDMenu.OnSectionLoaded("files.js",[[2,"bus_1553","File:",[[1,"axi_lite_1553.v"],[1,"up_1553.v"],[1,"wishbone_standard_1553.v"]]],[2,"bus_1553_tb","File2:",[[1,"tb_cocotb_axi_lite.py"],[1,"tb_cocotb_axi_lite.v"],[1,"tb_cocotb_up.py"],[1,"tb_cocotb_up.v"],[1,"tb_cocotb_wishbone_standard.py"],[1,"tb_cocotb_wishbone_standard.v"]]]]);

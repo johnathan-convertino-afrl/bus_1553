@@ -161,8 +161,8 @@ module wishbone_standard_1553 #(
     .INVERT_DATA(INVERT_DATA),
     .SAMPLE_SELECT(SAMPLE_SELECT)
   ) inst_up_1553 (
-    .clk(aclk),
-    .rstn(arstn),
+    .clk(clk),
+    .rstn(~rst),
     .up_rreq(up_rreq),
     .up_rack(up_rack),
     .up_raddr(up_raddr),

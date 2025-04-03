@@ -28,7 +28,7 @@
 
 \par
 BUS1553 is a core for interfacing the PMOD1553 device to a bus of choice. The core will process data to and from the PMOD1553.
-The data can then be accessed over a BUS, currently AXI lite or Wishbone Classic, and processed as needed. All input and output
+The data can then be accessed over a BUS, currently AXI lite or Wishbone Standard, and processed as needed. All input and output
 over the bus goes into FIFOs that is then tied to the demodulation and modulation cores, which then send/recv the differential data
 to/from the PMOD1553 device. The following is information on how to use the device in an FPGA, software, and in simulation.
 
@@ -119,13 +119,29 @@ Below highlights important folders from the root of the directory.
 \par
 There are a few different simulations that can be run for this core.
 
-\subsection{iverilog}
-\par
-iverilog is used for simple test benches for quick verification, visually, of the core.
-
 \subsection{cocotb}
 \par
-Future simulations will use cocotb. This feature is not yet implemented.
+Cocotb is the only method for simulating the various interations of the bus\_1553 core. At the moment there is a
+axi\_lite, wishbone\_standard, and uP based versions. This is currently set to use icarus as the sim tool for cocotb.
+
+\par
+To run the wishbone sim use the command below.
+\begin{lstlisting}[language=bash]
+fusesoc run --target sim_cocotb AFRL:device:wishbone_standard_1553:1.0.0
+\end{lstlisting}
+
+\par
+To run the axi\_lite sim use the command below.
+\begin{lstlisting}[language=bash]
+fusesoc run --target sim_cocotb AFRL:device:axi_lite_1553:1.0.0
+\end{lstlisting}
+
+\par
+To run the uP sim use the command below.
+\begin{lstlisting}[language=bash]
+fusesoc run --target sim_cocotb AFRL:device:up_1553:1.0.0
+\end{lstlisting}
+
 
 \newpage
 
@@ -143,8 +159,8 @@ axi\_lite\_1553 module adds a AXI Lite to uP (microprocessor) bus converter. The
 from Analog Devices.
 
 \par
-wishbone\_standard\_1553 module adds a Wishbone Classic to uP (microprocessor) bus converter. This
-converter was designed for Wishbone Classic only, NOT pipelined.
+wishbone\_standard\_1553 module adds a Wishbone Standard to uP (microprocessor) bus converter. This
+converter was designed for Wishbone Standard only, NOT pipelined.
 
 \vspace{15mm}
 \par

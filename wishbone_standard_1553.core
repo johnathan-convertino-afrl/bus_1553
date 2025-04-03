@@ -31,7 +31,7 @@ targets:
     flow: sim
     flow_options:
       tool: icarus
-      cocotb_module: tb_cocotb
+      cocotb_module: tb_cocotb_wishbone_standard
       timescale: 1ns/1ns
       vcs_options: [-timescale=1ns/1ns]
     filesets_append: [tb_cocotb]

@@ -1,5 +1,5 @@
 # BUS 1553
-### 1553 TO BUS (WISHBONE CLASSIC, AXI_LITE)
+### 1553 TO BUS (WISHBONE STANDARD, AXI_LITE)
 
 ![image](docs/manual/img/AFRL.png)
 
@@ -35,7 +35,7 @@
   - AFRL:device_converter:axis_1553_encoder:1.0.0
   - AFRL:device_converter:axis_1553_dencoder:1.0.0
   - AFRL:buffer:fifo
-  - AFRL:bus:up_wishbone_classic:1.0.0 (FOR WISHBONE)
+  - AFRL:bus:up_wishbone_standard:1.0.0 (FOR WISHBONE)
   - AD:common:up_axi:1.0.0 (FOR AXI LITE)
   
 #### Simulation
@@ -66,14 +66,18 @@
 #### SRC
 
 * up_1553.v
-* wishbone_classic_1553.v
+* wishbone_standard_1553.v
 * axi_lite_1553.v
   
 #### TB
 
-* tb_up_1553.v
-* tb_wishbone_1553.v
-  
+* tb_cocotb_up.v
+* tb_cocotb_up.py
+* tb_cocotb_axi_lite.v
+* tb_cocotb_axi_lite.py
+* tb_cocotb_wishbone_standard.v
+* tb_cocotb_wishbone_standard.py
+
 ### FUSESOC
 
 * fusesoc_info.core created.

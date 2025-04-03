@@ -22,7 +22,7 @@ HTML_LAT_DIR=$(HTML_DIR)/other
 
 all: $(ND_HTML)
 
-$(ND_HTML): $(LAT_HTML_HTML) $(VERILOG_SRC)
+$(ND_HTML): $(LAT_HTML_HTML) $(VERILOG_SRC) $(LAT_COM_SRC)
 	naturaldocs $(CFG_DIR) -ro
 
 $(LAT_HTML_HTML): $(LAT_HTML_SRC)

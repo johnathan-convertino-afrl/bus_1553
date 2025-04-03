@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("dat",["Variable"],[["DATA_BITS",,[["up_1553",,,,0,"File:up_1553.v:up_1553.DATA_BITS","SystemVerilogModule:up_1553:DATA_BITS"]]]]);

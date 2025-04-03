@@ -1,1 +1,1 @@
-﻿NDMenu.OnSectionLoaded("modules.js",[[1,"axi_lite_1553"],[1,"inst_axis_1553_decoder"],[1,"inst_axis_1553_encoder"],[1,"inst_rx_fifo"],[1,"inst_tx_fifo"],[1,"inst_up_1553"],[1,"inst_up_axi"],[1,"inst_up_wishbone_standard"],[1,"up_1553"],[1,"wishbone_standard_1553"]]);
+﻿NDMenu.OnSectionLoaded("modules.js",[[1,"axi_lite_1553"],[1,"dut"],[1,"inst_axis_1553_decoder"],[1,"inst_axis_1553_encoder"],[1,"inst_rx_fifo"],[1,"inst_tx_fifo"],[1,"inst_up_1553"],[1,"inst_up_axi"],[1,"inst_up_wishbone_standard"],[1,"tb_cocotb"],[1,"up_1553"],[1,"wishbone_standard_1553"]]);
