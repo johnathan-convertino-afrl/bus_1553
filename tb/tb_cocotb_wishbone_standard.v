@@ -1,5 +1,5 @@
 //******************************************************************************
-// file:    tb_cocotb.v
+// file:    tb_cocotb_wishbone_standard.v
 //
 // author:  JAY CONVERTINO
 //

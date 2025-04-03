@@ -1,5 +1,5 @@
 #******************************************************************************
-# file:    tb_cocotb.py
+# file:    tb_cocotb_axi_lite.py
 #
 # author:  JAY CONVERTINO
 #

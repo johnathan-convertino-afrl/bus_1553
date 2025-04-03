@@ -1,5 +1,5 @@
 #******************************************************************************
-# file:    tb_cocotb.py
+# file:    tb_cocotb_wishbone_standard.py
 #
 # author:  JAY CONVERTINO
 #

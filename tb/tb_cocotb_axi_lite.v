@@ -1,5 +1,5 @@
 //******************************************************************************
-// file:    tb_cocotb.v
+// file:    tb_cocotb_axi_lite.v
 //
 // author:  JAY CONVERTINO
 //
