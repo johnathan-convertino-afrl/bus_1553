@@ -127,13 +127,13 @@ module tb_cocotb #(
    * Device under test, axi_lite_1553
    */
   axi_lite_1553 #(
-    .ADDRESS_WIDTH(),
-    .BUS_WIDTH(),
-    .CLOCK_SPEED(),
-    .SAMPLE_RATE(),
-    .BIT_SLICE_OFFSET(),
-    .INVERT_DATA(),
-    .SAMPLE_SELECT()
+    .ADDRESS_WIDTH(ADDRESS_WIDTH),
+    .BUS_WIDTH(BUS_WIDTH),
+    .CLOCK_SPEED(CLOCK_SPEED),
+    .SAMPLE_RATE(SAMPLE_RATE),
+    .BIT_SLICE_OFFSET(BIT_SLICE_OFFSET),
+    .INVERT_DATA(INVERT_DATA),
+    .SAMPLE_SELECT(SAMPLE_SELECT)
   ) dut (
     .aclk(aclk),
     .arstn(arstn),

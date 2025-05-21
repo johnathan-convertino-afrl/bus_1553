@@ -5,14 +5,19 @@
 
 ---
 
-   author: Jay Convertino   
+  author: Jay Convertino   
+  
+  date: 2024.10.17
+  
+  details: Interface 1553 data to a AXI LITE or Wishbone interface bus.
+  
+  license: MIT   
    
-   date: 2024.10.17
-   
-   details: Interface 1553 data to a AXI LITE or Wishbone interface bus.
-   
-   license: MIT   
-   
+  Actions:  
+
+  [![Lint Status](../../actions/workflows/lint.yml/badge.svg)](../../actions)  
+  [![Manual Status](../../actions/workflows/manual.yml/badge.svg)](../../actions)  
+  
 ---
 
 ### VERSION
@@ -27,20 +32,6 @@
 
   - [bus_1553.pdf](docs/manual/bus_1553.pdf)
   - [github page](https://johnathan-convertino-afrl.github.io/bus_1553/)
-
-### DEPENDENCIES
-#### Build
-
-  - AFRL:utility:helper:1.0.0
-  - AFRL:device_converter:axis_1553_encoder:1.0.0
-  - AFRL:device_converter:axis_1553_dencoder:1.0.0
-  - AFRL:buffer:fifo
-  - AFRL:bus:up_wishbone_standard:1.0.0 (FOR WISHBONE)
-  - AD:common:up_axi:1.0.0 (FOR AXI LITE)
-  
-#### Simulation
-
-  - AFRL:simulation:axis_stimulator
 
 ### PARAMETERS
 
@@ -87,4 +78,5 @@
 
 * RUN WITH: (fusesoc run --target=sim VENDER:CORE:NAME:VERSION)
   - default (for IP integration builds)
+  - lint
   - sim_cocotb

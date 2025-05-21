@@ -83,7 +83,7 @@ module tb_cocotb #(
     input                       s_wb_we,
     input   [ADDRESS_WIDTH-1:0] s_wb_addr,
     input   [BUS_WIDTH*8-1:0]   s_wb_data_i,
-    input   [ 3:0]              s_wb_sel,
+    input   [BUS_WIDTH-1:0]     s_wb_sel,
     output                      s_wb_ack,
     output  [BUS_WIDTH*8-1:0]   s_wb_data_o,
     output                      s_wb_err,
