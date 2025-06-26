@@ -1,1 +1,0 @@
-﻿NDSearch.OnPrefixDataLoaded("di",["RegisterBit"],[["DI",,[["up_1553",,,,0,"File:up_1553.v:up_1553.DI","SystemVerilogModule:up_1553:DI"]]]]);

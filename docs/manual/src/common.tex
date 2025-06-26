@@ -58,8 +58,7 @@ to be routed so they match the PMOD1553 device. Please see the schematic of the 
 \par
 This core is made up of other cores that are documented in detail in there source. The cores this is made up of are the,
 \begin{itemize}
-  \item \textbf{axis\_1553\_encoder} Encodes data from the RX FIFO and sends it to the PMOD1553 (see core for documentation).
-  \item \textbf{axis\_1553\_decoder} Decodes data from the PMOD1553 and sends it to the TX FIFO (see core for documentation).
+  \item \textbf{axis\_1553} Encodes and decodeds data from the TX/RX FIFO and sends/recvs it to the PMOD1553 (see core for documentation).
   \item \textbf{fifo} Used for RX and TX FIFO instances. Set to 16 words buffer max (see core for documentation).
   \item \textbf{up\_axi} An AXI Lite to uP converter core (see core for documentation).
   \item \textbf{up\_wishbone\_standard} A wishbone standard to uP converter core (see core for documentation).

@@ -132,13 +132,13 @@ module up_1553 #(
   localparam STATUS_REG  = 4'h8 >> DIVISOR;
   /* Register Bits: Status Register Bits
    *
-   * PC        - 6, Parity check passed?
-   * DI        - 5, Frame error?
-   * irq_en    - 4, 1 when the IRQ is enabled by <CONTROL_REG>
-   * tx_full   - 3, When 1 the tx fifo is full.
-   * tx_empty  - 2, When 1 the tx fifo is empty.
-   * rx_full   - 1, When 1 the rx fifo is full.
-   * rx_valid  - 0, When 1 the rx fifo contains valid data.
+   * parity_err - 6, When 1 an error in the RX parity check has occured
+   * frame_err  - 5, When 1 an error in the RX frame has occured (manchester data 2'b11 or 2'b00).
+   * irq_en     - 4, When 1 the IRQ is enabled by <CONTROL_REG>
+   * tx_full    - 3, When 1 the tx fifo is full.
+   * tx_empty   - 2, When 1 the tx fifo is empty.
+   * rx_full    - 1, When 1 the rx fifo is full.
+   * rx_valid   - 0, When 1 the rx fifo contains valid data.
    */
   // Register Address: CONTROL_REG
   // Defines the address offset to set the control bits.
