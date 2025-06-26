@@ -43,10 +43,6 @@
  *   ADDRESS_WIDTH   - Width of the uP address port, max 32 bit.
  *   BUS_WIDTH       - Width of the uP bus data port.
  *   CLOCK_SPEED     - This is the aclk frequency in Hz
- *   SAMPLE_RATE     - Rate of in which to sample the 1553 bus. Must be 2 MHz or more and less than aclk. This is in Hz.
- *   BIT_SLICE_OFFSET- Adjust where the sample is taken from the input.
- *   INVERT_DATA     - Invert all 1553 bits coming in and out.
- *   SAMPLE_SELECT   - Adjust where in the array of samples to select a bit.
  *
  * Ports:
  *
@@ -60,19 +56,15 @@
  *   up_wack        - uP bus write ack
  *   up_waddr       - uP bus write address
  *   up_wdata       - uP bus write data
- *   i_diff         - Input differential signal for 1553 bus
- *   o_diff         - Output differential signal for 1553 bus
- *   en_o_diff      - Enable output of differential signal (for signal switching on 1553 module)
+ *   rx_diff        - Input differential signal for 1553 bus
+ *   tx_diff        - Output differential signal for 1553 bus
+ *   tx_active      - Enable output of differential signal as this indicates tx is active (for signal switching on 1553 module)
  *   irq            - Interrupt when data is received
  */
 module up_1553 #(
     parameter ADDRESS_WIDTH = 32,
     parameter BUS_WIDTH     = 4,
-    parameter CLOCK_SPEED   = 100000000,
-    parameter SAMPLE_RATE   = 2000000,
-    parameter BIT_SLICE_OFFSET  = 0,
-    parameter INVERT_DATA       = 0,
-    parameter SAMPLE_SELECT     = 0
+    parameter CLOCK_SPEED   = 100000000
   ) 
   (
     input                                           clk,
@@ -85,11 +77,10 @@ module up_1553 #(
     output                                          up_wack,
     input   [ADDRESS_WIDTH-(BUS_WIDTH/2)-1:0]       up_waddr,
     input   [(BUS_WIDTH*8)-1:0]                     up_wdata,
-    input   [1:0]                                   i_diff,
-    output  [1:0]                                   o_diff,
-    output                                          en_o_diff,
+    input   [1:0]                                   rx_diff,
+    output  [1:0]                                   tx_diff,
+    output                                          tx_active,
     output                                          irq
-
   );
   // var: DIVISOR
   // Divide the address register default location for 1 byte access to multi byte access. (register offsets are byte offsets).
@@ -101,7 +92,7 @@ module up_1553 #(
 
   // var: DATA_BITS
   // Number of bits in RX/TX FIFO that are valid.
-  localparam DATA_BITS = 24;
+  localparam DATA_BITS = 21;
 
   // Group: Register Information
   // Core has 4 registers at the offsets that follow.
@@ -114,30 +105,26 @@ module up_1553 #(
   // Register Address: RX_FIFO_REG
   // Defines the address offset for RX FIFO
   // (see diagrams/reg_RX_FIFO.png)
-  // Valid bits are from 23:0. Bits 23:16 are status bits information about the data.  Bit 15:0 are data.
+  // Valid bits are from 20:0. Bits 20:16 are status bits information about the data.  Bit 15:0 are data.
   //
   // Status Bits:
-  // {TY:3,NA:1,D:1,I:1,P:1}
+  // {S:1,D:1,TY:3}
   //
   // TY - Type is 3 bits, 000 NA, 001 = REG, 010 = DATA, 100 = CMD/STATUS
-  // NA - Unused is 1 bit
   // D  - Delay Enabled is 1 bit, 1 is there was be a delay of 4 us or more, or 0 no delay.
-  // I  - Data invert enabled is 1 bit, 1 inverted in the core at synth, 0 it is not.
-  // P  - Parity Good is 1 bit, 1 is Good, 0 is Bad
+  // S  - Sync only when 1, normal is 0
   localparam RX_FIFO_REG = 4'h0 >> DIVISOR;
   // Register Address: TX_FIFO_REG
   // Defines the address offset to write the TX FIFO.
   // (see diagrams/reg_TX_FIFO.png)
-  // Valid bits are from 23:0. Bits 23:16 are status bits information about the data.  Bit 15:0 are data.
+  // Valid bits are from 20:0. Bits 20:16 are status bits information about the data.  Bit 15:0 are data.
   //
   // Status Bits:
-  // {TY:3,NA:1,D:1,I:1,P:1}
+  // {S:1,D:1,TY:3}
   //
   // TY - Type is 3 bits, 000 NA, 001 = REG, 010 = DATA, 100 = CMD/STATUS
-  // NA - Unused is 1 bit
   // D  - Delay Enabled is 1 bit, 1 is there must be a delay of 4 us or more, or 0 no delay.
-  // I  - Data invert enabled is 1 bit, set to 1 to invert data in the core, 0 it is not.
-  // P  - Parity Type is 1 bit, 1 is ODD, 0 is EVEN
+  // S  - Sync only when 1, normal is 0
   localparam TX_FIFO_REG = 4'h4 >> DIVISOR;
   // Register Address: STATUS_REG
   // Defines the address offset to read the status bits.
@@ -145,9 +132,8 @@ module up_1553 #(
   localparam STATUS_REG  = 4'h8 >> DIVISOR;
   /* Register Bits: Status Register Bits
    *
-   * PC        - 7, Parity check passed?
-   * DI        - 6, Build time option to invert data from the core, 1 is active.
-   * Delay     - 5, Message had a 4uS delay.
+   * PC        - 6, Parity check passed?
+   * DI        - 5, Frame error?
    * irq_en    - 4, 1 when the IRQ is enabled by <CONTROL_REG>
    * tx_full   - 3, When 1 the tx fifo is full.
    * tx_empty  - 2, When 1 the tx fifo is empty.
@@ -240,10 +226,10 @@ module up_1553 #(
         case(up_raddr[3:0])
           /// @REG RX_FIFO_REG
           RX_FIFO_REG: begin
-            r_up_rdata <= rx_rdata & {{(BUS_WIDTH*8-DATA_BITS){1'b0}}, {DATA_BITS{1'b1}}};
+            r_up_rdata <= {{(BUS_WIDTH*8-DATA_BITS){1'b0}}, rx_rdata[DATA_BITS-1:0]};
           end
-          STATUS_REG: begin                         //Data parity?, invert?,  4uS delay?
-            r_up_rdata <= {{(BUS_WIDTH*8-8){1'b0}}, rx_rdata[16], rx_rdata[17], rx_rdata[18], r_irq_en, tx_full, tx_empty, rx_full, rx_valid};
+          STATUS_REG: begin                         //parity err  //frame err 
+            r_up_rdata <= {{(BUS_WIDTH*8-7){1'b0}}, rx_rdata[22], rx_rdata[21], r_irq_en, tx_full, tx_empty, rx_full, rx_valid};
           end
           default:begin
             r_up_rdata <= 0;
@@ -314,47 +300,35 @@ module up_1553 #(
       end
     end
   end
-
-  //Group: Instantiated Modules
+  
   /*
-   * Module: inst_axis_1553_encoder
+   * Module: inst_axis_1553
    *
-   * Encode incoming AXIS data into a differential 1553 data stream
+   * Decode/Encode differential 1553 data stream to AXIS data format.
    */
-  axis_1553_encoder #(
+  axis_1553 #(
     .CLOCK_SPEED(CLOCK_SPEED),
-    .SAMPLE_RATE(SAMPLE_RATE)
-  ) inst_axis_1553_encoder (
-    .aclk(clk),
-    .arstn(rstn),
+    .RX_BAUD_DELAY(0),
+    .TX_BAUD_DELAY(0)
+  ) inst_axis_1553 (
+    .aclk(aclk),
+    .arstn(rstn & r_rstn_rx_delay[0]),
+    .parity_err(m_axis_tdata[22]),
+    .frame_err(m_axis_tdata[21]),
     .s_axis_tdata(tx_rdata[15:0]),
+    .s_axis_tuser(tx_rdata[20:16]),
     .s_axis_tvalid(tx_valid),
-    .s_axis_tuser(tx_rdata[23:16]),
     .s_axis_tready(s_axis_tready),
-    .diff(o_diff),
-    .en_diff(en_o_diff)
-  );
-
-  /*
-   * Module: inst_axis_1553_decoder
-   *
-   * Decode incoming differential 1553 data stream to AXIS data format.
-   */
-  axis_1553_decoder #(
-    .CLOCK_SPEED(CLOCK_SPEED),
-    .SAMPLE_RATE(SAMPLE_RATE),
-    .BIT_SLICE_OFFSET(BIT_SLICE_OFFSET),
-    .INVERT_DATA(INVERT_DATA),
-    .SAMPLE_SELECT(SAMPLE_SELECT)
-  ) inst_axis_1553_decoder (
-    .aclk(clk),
-    .arstn(rstn),
     .m_axis_tdata(m_axis_tdata[15:0]),
+    .m_axis_tuser(m_axis_tdata[20:16]),
     .m_axis_tvalid(m_axis_tvalid),
-    .m_axis_tuser(m_axis_tdata[23:16]),
     .m_axis_tready(~rx_full),
-    .diff(i_diff)
+    .tx_active(tx_active),
+    .tx_diff(tx_diff),
+    .rx_diff(rx_diff)
   );
+  
+  assign m_axis_tdata[31:23] = 0;
 
   /*
    * Module: inst_rx_fifo
@@ -385,7 +359,7 @@ module up_1553 #(
     .wr_rstn(rstn & r_rstn_rx_delay[0]),
     .wr_en(m_axis_tvalid),
     .wr_ack(),
-    .wr_data({{(BUS_WIDTH*8-DATA_BITS){1'b0}}, m_axis_tdata}),
+    .wr_data(m_axis_tdata),
     .wr_full(rx_full),
     .data_count_clk(clk),
     .data_count_rstn(rstn & r_rstn_rx_delay[0]),
@@ -427,4 +401,5 @@ module up_1553 #(
     .data_count_rstn(rstn & r_rstn_tx_delay[0]),
     .data_count()
   );
+  
 endmodule

@@ -43,10 +43,6 @@
  *   ADDRESS_WIDTH   - Width of the uP address port, max 32 bit.
  *   BUS_WIDTH       - Width of the uP bus data port.
  *   CLOCK_SPEED     - This is the aclk frequency in Hz
- *   SAMPLE_RATE     - Rate of in which to sample the 1553 bus. Must be 2 MHz or more and less than aclk. This is in Hz.
- *   BIT_SLICE_OFFSET- Adjust where the sample is taken from the input.
- *   INVERT_DATA     - Invert all 1553 bits coming in and out.
- *   SAMPLE_SELECT   - Adjust where in the array of samples to select a bit.
  *
  * Ports:
  *
@@ -60,19 +56,15 @@
  *   up_wack        - uP bus write ack
  *   up_waddr       - uP bus write address
  *   up_wdata       - uP bus write data
- *   i_diff         - Input differential signal for 1553 bus
- *   o_diff         - Output differential signal for 1553 bus
- *   en_o_diff      - Enable output of differential signal (for signal switching on 1553 module)
+ *   rx_diff        - Input differential signal for 1553 bus
+ *   tx_diff        - Output differential signal for 1553 bus
+ *   tx_active      - Enable output of differential signal (for signal switching on 1553 module)
  *   irq            - Interrupt when data is received
  */
 module tb_cocotb #(
     parameter ADDRESS_WIDTH = 32,
     parameter BUS_WIDTH     = 4,
-    parameter CLOCK_SPEED   = 100000000,
-    parameter SAMPLE_RATE   = 2000000,
-    parameter BIT_SLICE_OFFSET  = 0,
-    parameter INVERT_DATA       = 0,
-    parameter SAMPLE_SELECT     = 0
+    parameter CLOCK_SPEED   = 100000000
   )
   (
     input                                           clk,
@@ -85,9 +77,9 @@ module tb_cocotb #(
     output                                          up_wack,
     input   [ADDRESS_WIDTH-(BUS_WIDTH/2)-1:0]       up_waddr,
     input   [(BUS_WIDTH*8)-1:0]                     up_wdata,
-    input   [1:0]                                   i_diff,
-    output  [1:0]                                   o_diff,
-    output                                          en_o_diff,
+    input   [1:0]                                   rx_diff,
+    output  [1:0]                                   tx_diff,
+    output                                          tx_active,
     output                                          irq
   );
   // fst dump command
@@ -107,11 +99,7 @@ module tb_cocotb #(
   up_1553 #(
     .ADDRESS_WIDTH(ADDRESS_WIDTH),
     .BUS_WIDTH(BUS_WIDTH),
-    .CLOCK_SPEED(CLOCK_SPEED),
-    .SAMPLE_RATE(SAMPLE_RATE),
-    .BIT_SLICE_OFFSET(BIT_SLICE_OFFSET),
-    .INVERT_DATA(INVERT_DATA),
-    .SAMPLE_SELECT(SAMPLE_SELECT)
+    .CLOCK_SPEED(CLOCK_SPEED)
   ) dut (
     .clk(clk),
     .rstn(rstn),
@@ -123,9 +111,9 @@ module tb_cocotb #(
     .up_wack(up_wack),
     .up_waddr(up_waddr),
     .up_wdata(up_wdata),
-    .i_diff(i_diff),
-    .o_diff(o_diff),
-    .en_o_diff(en_o_diff),
+    .rx_diff(rx_diff),
+    .tx_diff(tx_diff),
+    .tx_active(tx_active),
     .irq(irq)
   );
   

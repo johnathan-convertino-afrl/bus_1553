@@ -12,13 +12,12 @@ filesets:
   tb_cocotb:
     files:
       - tb/tb_cocotb_up.py : {file_type : user, copyto : .}
-      - tb/tb_cocotb_up.v : { file_type: verilogSource }
+      - tb/tb_cocotb_up.v  : { file_type: verilogSource }
     
   dep:
     depend:
       - AFRL:utility:helper:1.0.0
-      - AFRL:device_converter:axis_1553_encoder:1.0.0
-      - AFRL:device_converter:axis_1553_decoder:1.0.0
+      - AFRL:device_converter:axis_1553:1.0.0
       - AFRL:buffer:fifo
     
 targets:

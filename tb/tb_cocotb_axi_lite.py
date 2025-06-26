@@ -82,7 +82,7 @@ async def increment_test_cmd_send(dut):
 
     axil_master = AxiLiteMaster(AxiLiteBus.from_prefix(dut, "s_axi"), dut.aclk, dut.arstn, False)
 
-    milstd1553_sink = MILSTD1553Sink(dut.o_diff)
+    milstd1553_sink = MILSTD1553Sink(dut.tx_diff, dut.arstn)
 
     await reset_dut(dut)
 
@@ -117,7 +117,7 @@ async def increment_test_cmd_recv(dut):
 
     axil_master = AxiLiteMaster(AxiLiteBus.from_prefix(dut, "s_axi"), dut.aclk, dut.arstn, False)
 
-    milstd1553_source = MILSTD1553Source(dut.i_diff)
+    milstd1553_source = MILSTD1553Source(dut.rx_diff, dut.arstn)
 
     for x in range(0, 2**8):
 
@@ -148,7 +148,7 @@ async def increment_test_data_send(dut):
 
     axil_master = AxiLiteMaster(AxiLiteBus.from_prefix(dut, "s_axi"), dut.aclk, dut.arstn, False)
 
-    milstd1553_sink = MILSTD1553Sink(dut.o_diff)
+    milstd1553_sink = MILSTD1553Sink(dut.tx_diff, dut.arstn)
 
     for x in range(0, 2**8):
 
@@ -181,7 +181,7 @@ async def increment_test_data_recv(dut):
 
     axil_master = AxiLiteMaster(AxiLiteBus.from_prefix(dut, "s_axi"), dut.aclk, dut.arstn, False)
 
-    milstd1553_source = MILSTD1553Source(dut.i_diff)
+    milstd1553_source = MILSTD1553Source(dut.rx_diff, dut.arstn)
 
     for x in range(0, 2**8):
 

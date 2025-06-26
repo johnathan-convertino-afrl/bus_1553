@@ -83,7 +83,7 @@ async def increment_test_cmd_send(dut):
 
     up_master = upMaster(dut, "up", dut.clk, dut.rstn)
 
-    milstd1553_sink = MILSTD1553Sink(dut.o_diff)
+    milstd1553_sink = MILSTD1553Sink(dut.tx_diff, dut.rstn)
 
     await reset_dut(dut)
 
@@ -120,7 +120,7 @@ async def increment_test_cmd_recv(dut):
 
     up_master = upMaster(dut, "up", dut.clk, dut.rstn)
 
-    milstd1553_source = MILSTD1553Source(dut.i_diff)
+    milstd1553_source = MILSTD1553Source(dut.rx_diff, dut.rstn)
 
     await reset_dut(dut)
 
@@ -152,7 +152,7 @@ async def increment_test_data_send(dut):
 
     up_master = upMaster(dut, "up", dut.clk, dut.rstn)
 
-    milstd1553_sink = MILSTD1553Sink(dut.o_diff)
+    milstd1553_sink = MILSTD1553Sink(dut.tx_diff, dut.rstn)
 
     await reset_dut(dut)
 
@@ -189,7 +189,7 @@ async def increment_test_data_recv(dut):
 
     up_master = upMaster(dut, "up", dut.clk, dut.rstn)
 
-    milstd1553_source = MILSTD1553Source(dut.i_diff)
+    milstd1553_source = MILSTD1553Source(dut.rx_diff, dut.rstn)
 
     await reset_dut(dut)
 

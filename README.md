@@ -1,5 +1,6 @@
 # BUS 1553
 ### 1553 TO BUS (WISHBONE STANDARD, AXI_LITE)
+---
 
 ![image](docs/manual/img/AFRL.png)
 
@@ -38,9 +39,6 @@
   *   ADDRESS_WIDTH   - Width of the axi address bus
   *   CLOCK_SPEED     - This is the aclk frequency in Hz
   *   SAMPLE_RATE     - Rate of in which to sample the 1553 bus. Must be 2 MHz or more and less than aclk. This is in Hz.
-  *   BIT_SLICE_OFFSET- Adjust where the sample is taken from the input.
-  *   INVERT_DATA     - Invert all 1553 bits coming in and out.
-  *   SAMPLE_SELECT   - Adjust where in the array of samples to select a bit.
 
 ### REGISTERS
 

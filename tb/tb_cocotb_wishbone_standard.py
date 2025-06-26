@@ -82,7 +82,7 @@ async def increment_test_cmd_send(dut):
 
     wishbone_master = wishboneStandardMaster(dut, "s_wb", dut.clk, dut.rst)
 
-    milstd1553_sink = MILSTD1553Sink(dut.o_diff)
+    milstd1553_sink = MILSTD1553Sink(dut.tx_diff, dut.rstn)
 
     await reset_dut(dut)
 
@@ -115,7 +115,7 @@ async def increment_test_cmd_recv(dut):
 
     wishbone_master = wishboneStandardMaster(dut, "s_wb", dut.clk, dut.rst)
 
-    milstd1553_source = MILSTD1553Source(dut.i_diff)
+    milstd1553_source = MILSTD1553Source(dut.rx_diff, dut.rstn)
 
     for x in range(0, 2**8):
 
@@ -146,7 +146,7 @@ async def increment_test_data_send(dut):
 
     wishbone_master = wishboneStandardMaster(dut, "s_wb", dut.clk, dut.rst)
 
-    milstd1553_sink = MILSTD1553Sink(dut.o_diff)
+    milstd1553_sink = MILSTD1553Sink(dut.tx_diff, dut.rstn)
 
     for x in range(0, 2**8):
 
@@ -177,7 +177,7 @@ async def increment_test_data_recv(dut):
 
     wishbone_master = wishboneStandardMaster(dut, "s_wb", dut.clk, dut.rst)
 
-    milstd1553_source = MILSTD1553Source(dut.i_diff)
+    milstd1553_source = MILSTD1553Source(dut.rx_diff, dut.rst)
 
     for x in range(0, 2**8):
 
