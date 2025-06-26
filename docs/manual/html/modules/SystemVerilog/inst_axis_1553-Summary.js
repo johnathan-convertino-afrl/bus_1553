@@ -1,0 +1,1 @@
+﻿NDFramePage.OnPageTitleLoaded("SystemVerilogModule:inst_axis_1553","inst_axis_1553");NDSummary.OnSummaryLoaded("SystemVerilogModule:inst_axis_1553",[["SystemVerilog","SystemVerilog"]],[["Modules","Module"]],[[157,0,0,"inst_axis_1553"]]);

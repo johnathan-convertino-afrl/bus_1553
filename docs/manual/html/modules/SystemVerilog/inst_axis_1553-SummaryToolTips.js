@@ -1,0 +1,1 @@
+﻿NDSummary.OnToolTipsLoaded("SystemVerilogModule:inst_axis_1553",{157:"<div class=\"NDToolTip TModule LSystemVerilog\"><div class=\"TTSummary\">Decode/Encode differential 1553 data stream to AXIS data format.</div></div>"});

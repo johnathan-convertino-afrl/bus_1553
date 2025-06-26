@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("fra",["RegisterBit"],[["frame_err",,[["up_1553",,,,0,"File:up_1553.v:up_1553.frame_err","SystemVerilogModule:up_1553:frame_err"]]]]);
