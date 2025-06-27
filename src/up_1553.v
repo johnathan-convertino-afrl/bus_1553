@@ -132,8 +132,9 @@ module up_1553 #(
   localparam STATUS_REG  = 4'h8 >> DIVISOR;
   /* Register Bits: Status Register Bits
    *
-   * parity_err - 6, When 1 an error in the RX parity check has occured
-   * frame_err  - 5, When 1 an error in the RX frame has occured (manchester data 2'b11 or 2'b00).
+   * parity_err - 7, When 1 an error in the RX parity check has occured
+   * frame_err  - 6, When 1 an error in the RX frame has occured (manchester data 2'b11 or 2'b00).
+   * rx_hold_en - 5, When 1 the RX HOLD is enable by <CONTROL_REG>
    * irq_en     - 4, When 1 the IRQ is enabled by <CONTROL_REG>
    * tx_full    - 3, When 1 the tx fifo is full.
    * tx_empty   - 2, When 1 the tx fifo is empty.
@@ -147,13 +148,15 @@ module up_1553 #(
   localparam CONTROL_REG = 4'hC;
   /* Register Bits: Control Register Bits
    *
-   * ENABLE_INTR_BIT  - 4, Control Register offset bit for enabling the interrupt.
-   * RESET_RX_BIT     - 1, Control Register offset bit for resetting the RX FIFO.
-   * RESET_TX_BIT     - 0, Control Register offset bit for resetting the TX FIFO.
+   * ENABLE_INTR_BIT    - 4, Control Register offset bit for enabling the interrupt.
+   * ENABLE_RX_HOLD_BIT - 3, Control that RX will hold its clock on non diffs for a moment.
+   * RESET_RX_BIT       - 1, Control Register offset bit for resetting the RX FIFO.
+   * RESET_TX_BIT       - 0, Control Register offset bit for resetting the TX FIFO.
    */
-  localparam ENABLE_INTR_BIT  = 4;
-  localparam RESET_RX_BIT     = 1;
-  localparam RESET_TX_BIT     = 0;
+  localparam ENABLE_INTR_BIT    = 4;
+  localparam ENABLE_RX_HOLD_BIT = 3
+  localparam RESET_RX_BIT       = 1;
+  localparam RESET_TX_BIT       = 0;
 
 
   // Register for reset delay once RESET_RX_BIT is set.
@@ -189,6 +192,7 @@ module up_1553 #(
   //control register
   reg  [(BUS_WIDTH*8)-1:0]  r_control_reg;
   reg                       r_irq_en;
+  reg                       r_rx_hold_en;
 
   //interrupt
   reg                       r_irq;
@@ -229,7 +233,7 @@ module up_1553 #(
             r_up_rdata <= {{(BUS_WIDTH*8-DATA_BITS){1'b0}}, rx_rdata[DATA_BITS-1:0]};
           end
           STATUS_REG: begin                         //parity err  //frame err 
-            r_up_rdata <= {{(BUS_WIDTH*8-7){1'b0}}, rx_rdata[22], rx_rdata[21], r_irq_en, tx_full, tx_empty, rx_full, rx_valid};
+            r_up_rdata <= {{(BUS_WIDTH*8-8){1'b0}}, rx_rdata[22], rx_rdata[21], r_rx_hold_en, r_irq_en, tx_full, tx_empty, rx_full, rx_valid};
           end
           default:begin
             r_up_rdata <= 0;
@@ -262,11 +266,16 @@ module up_1553 #(
     begin
       r_rstn_rx_delay <= ~0;
       r_rstn_tx_delay <= ~0;
+      r_rx_hold_en <= 1'b0;
       r_irq_en <= 1'b0;
     end else begin
       r_rstn_rx_delay <= {1'b1, r_rstn_rx_delay[FIFO_DEPTH-1:1]};
       r_rstn_tx_delay <= {1'b1, r_rstn_rx_delay[FIFO_DEPTH-1:1]};
 
+      r_rx_hold_en <= r_control_reg[ENABLE_RX_HOLD_BIT];
+      
+      r_irq_en <= r_control_reg[ENABLE_INTR_BIT];
+      
       if(r_control_reg[RESET_RX_BIT])
       begin
         r_rstn_rx_delay <= {FIFO_DEPTH{1'b0}};
@@ -275,11 +284,6 @@ module up_1553 #(
       if(r_control_reg[RESET_TX_BIT])
       begin
         r_rstn_tx_delay <= {FIFO_DEPTH{1'b0}};
-      end
-
-      if(r_control_reg[ENABLE_INTR_BIT] != r_irq_en)
-      begin
-        r_irq_en <= r_control_reg[ENABLE_INTR_BIT];
       end
     end
   end
@@ -315,6 +319,7 @@ module up_1553 #(
     .arstn(rstn & r_rstn_rx_delay[0]),
     .parity_err(m_axis_tdata[22]),
     .frame_err(m_axis_tdata[21]),
+    .rx_hold_en(r_rx_hold_en),
     .s_axis_tdata(tx_rdata[15:0]),
     .s_axis_tuser(tx_rdata[20:16]),
     .s_axis_tvalid(tx_valid),
