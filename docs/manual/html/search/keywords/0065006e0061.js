@@ -1,1 +1,1 @@
-﻿NDSearch.OnPrefixDataLoaded("ena",["RegisterBit"],[["ENABLE_INTR_BIT",,[["up_1553",,,,0,"File:up_1553.v:up_1553.ENABLE_INTR_BIT","SystemVerilogModule:up_1553:ENABLE_INTR_BIT"]]]]);
+﻿NDSearch.OnPrefixDataLoaded("ena",["RegisterBit"],[["ENABLE_INTR_BIT",,[["up_1553",,,,0,"File:up_1553.v:up_1553.ENABLE_INTR_BIT","SystemVerilogModule:up_1553:ENABLE_INTR_BIT"]]],["ENABLE_RX_HOLD_BIT",,[["up_1553",,,,0,"File:up_1553.v:up_1553.ENABLE_RX_HOLD_BIT","SystemVerilogModule:up_1553:ENABLE_RX_HOLD_BIT"]]]]);
