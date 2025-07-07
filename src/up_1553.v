@@ -154,7 +154,7 @@ module up_1553 #(
    * RESET_TX_BIT       - 0, Control Register offset bit for resetting the TX FIFO.
    */
   localparam ENABLE_INTR_BIT    = 4;
-  localparam ENABLE_RX_HOLD_BIT = 3
+  localparam ENABLE_RX_HOLD_BIT = 3;
   localparam RESET_RX_BIT       = 1;
   localparam RESET_TX_BIT       = 0;
 
